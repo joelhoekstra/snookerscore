@@ -75,7 +75,7 @@
   </style>
 </head>
 <body>
-  <h1>Snooker Scoreboard</h1>
+  <h1>JSC Scoreboard</h1>
   <div>
     <label for="game-mode">Select Game Mode: </label>
     <select id="game-mode" onchange="setGameMode()">
@@ -86,7 +86,7 @@
   </div>
   <div id="scoreboard">
     <div class="team">
-      <h2>Team A</h2>
+      <h2>Hoekstra</h2>
       <div class="score" id="score-a">0</div>
       <div class="break-score" id="break-a">Break: 0</div>
       <div class="break-history" id="history-a"></div>
@@ -104,7 +104,7 @@
       </div>
     </div>
     <div class="team">
-      <h2>Team B</h2>
+      <h2>Tulloch</h2>
       <div class="score" id="score-b">0</div>
       <div class="break-score" id="break-b">Break: 0</div>
       <div class="break-history" id="history-b"></div>
@@ -126,8 +126,8 @@
   <div id="foul-indicator">Foul Mode: Off</div>
   <div class="point-difference" id="point-difference">Point Difference: 0</div>
   <div class="remaining-reds" id="remaining-reds">Remaining Reds: 10</div>
-  <button class="foul-button" onclick="toggleFoul('a')">Foul to Team A</button>
-  <button class="foul-button" onclick="toggleFoul('b')">Foul to Team B</button>
+  <button class="foul-button" onclick="toggleFoul('a')">Foul awarded to J1</button>
+  <button class="foul-button" onclick="toggleFoul('b')">Foul awarded to J2</button>
   <button class="foul-button" onclick="toggleFoul(null)">Turn Foul Off</button>
   <button class="reset-button" onclick="resetScores()">Reset Scores</button>
 
@@ -228,8 +228,8 @@
   function toggleFoul(team) {
     foulTo = team;
     const indicator = document.getElementById("foul-indicator");
-    if (team === "a") indicator.textContent = "Foul Mode: Points to Team A";
-    else if (team === "b") indicator.textContent = "Foul Mode: Points to Team B";
+    if (team === "a") indicator.textContent = "Foul Mode: Points to Hoekstra";
+    else if (team === "b") indicator.textContent = "Foul Mode: Points to Tulloch";
     else indicator.textContent = "Foul Mode: Off";
   }
 
