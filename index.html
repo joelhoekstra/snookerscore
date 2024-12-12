@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snooker Scoreboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .team {
+      display: inline-block;
+      margin: 20px;
+      font-size: 24px;
+    }
+    .score {
+      font-size: 48px;
+      margin: 10px 0;
+    }
+    .break-score {
+      font-size: 18px;
+      color: #555;
+    }
+    .break-history {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .break-history div {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      margin: 2px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .foul-button {
+      background-color: #f44336;
+      color: white;
+      font-size: 18px;
+    }
+    .reset-button {
+      background-color: #007bff;
+      color: white;
+      font-size: 18px;
+    }
+    .point-button {
+      width: 60px;
+    }
+    .red-points {
+      font-size: 20px;
+      color: red;
+      font-weight: bold;
+    }
+    #foul-indicator {
+      margin: 10px;
+      font-size: 18px;
+      color: darkred;
+    }
+    .point-difference {
+      font-size: 20px;
+      color: darkblue;
+      margin-top: 10px;
+    }
+    .remaining-reds {
+      font-size: 20px;
+      color: darkgreen;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Snooker Scoreboard</h1>
+  <div>
+    <label for="game-mode">Select Game Mode: </label>
+    <select id="game-mode" onchange="setGameMode()">
+      <option value="6">6 Reds</option>
+      <option value="10" selected>10 Reds</option>
+      <option value="15">15 Reds</option>
+    </select>
+  </div>
+  <div id="scoreboard">
+    <div class="team">
+      <h2>Team A</h2>
+      <div class="score" id="score-a">0</div>
+      <div class="break-score" id="break-a">Break: 0</div>
+      <div class="break-history" id="history-a"></div>
+      <button class="point-button" onclick="incrementScore('a', 1, 'red')" style="background-color: red;">1</button>
+      <button class="point-button" onclick="incrementScore('a', 2, 'yellow')" style="background-color: yellow;">2</button>
+      <button class="point-button" onclick="incrementScore('a', 3, 'green')" style="background-color: green;">3</button>
+      <button class="point-button" onclick="incrementScore('a', 4, 'brown')" style="background-color: brown;">4</button>
+      <button class="point-button" onclick="incrementScore('a', 5, 'blue')" style="background-color: blue;">5</button>
+      <button class="point-button" onclick="incrementScore('a', 6, 'pink')" style="background-color: pink;">6</button>
+      <button class="point-button" onclick="incrementScore('a', 7, 'black')" style="background-color: black; color: white;">7</button>
+      <div>
+        <button onclick="changeFrame('a', 1)">+ Frame</button>
+        <span id="frame-a">0</span>
+        <button onclick="changeFrame('a', -1)">- Frame</button>
+      </div>
+    </div>
+    <div class="team">
+      <h2>Team B</h2>
+      <div class="score" id="score-b">0</div>
+      <div class="break-score" id="break-b">Break: 0</div>
+      <div class="break-history" id="history-b"></div>
+      <button class="point-button" onclick="incrementScore('b', 1, 'red')" style="background-color: red;">1</button>
+      <button class="point-button" onclick="incrementScore('b', 2, 'yellow')" style="background-color: yellow;">2</button>
+      <button class="point-button" onclick="incrementScore('b', 3, 'green')" style="background-color: green;">3</button>
+      <button class="point-button" onclick="incrementScore('b', 4, 'brown')" style="background-color: brown;">4</button>
+      <button class="point-button" onclick="incrementScore('b', 5, 'blue')" style="background-color: blue;">5</button>
+      <button class="point-button" onclick="incrementScore('b', 6, 'pink')" style="background-color: pink;">6</button>
+      <button class="point-button" onclick="incrementScore('b', 7, 'black')" style="background-color: black; color: white;">7</button>
+      <div>
+        <button onclick="changeFrame('b', 1)">+ Frame</button>
+        <span id="frame-b">0</span>
+        <button onclick="changeFrame('b', -1)">- Frame</button>
+      </div>
+    </div>
+  </div>
+  <div class="red-points" id="red-points">Total Points Available: 107</div>
+  <div id="foul-indicator">Foul Mode: Off</div>
+  <div class="point-difference" id="point-difference">Point Difference: 0</div>
+  <div class="remaining-reds" id="remaining-reds">Remaining Reds: 10</div>
+  <button class="foul-button" onclick="toggleFoul('a')">Foul to Team A</button>
+  <button class="foul-button" onclick="toggleFoul('b')">Foul to Team B</button>
+  <button class="foul-button" onclick="toggleFoul(null)">Turn Foul Off</button>
+  <button class="reset-button" onclick="resetScores()">Reset Scores</button>
+
+<script>
+  let scoreA = 0;
+  let scoreB = 0;
+  let breakA = 0;
+  let breakB = 0;
+  let redPoints = 10; // Default 10 reds
+  let totalPoints = redPoints * 8 + 27; // Total points available
+  let foulTo = null; // "a" for Team A, "b" for Team B, null for off
+  let lastPlayer = null;
+  let frameA = 0;
+  let frameB = 0;
+
+  function setGameMode() {
+    const mode = parseInt(document.getElementById("game-mode").value);
+    redPoints = mode;
+    totalPoints = redPoints * 8 + 27;
+    resetScores();
+  }
+
+  function updatePointsDisplay() {
+    document.getElementById("red-points").innerText = `Total Points Available: ${totalPoints}`;
+    document.getElementById("point-difference").innerText = `Point Difference: ${Math.abs(scoreA - scoreB)}`;
+    document.getElementById("remaining-reds").innerText = `Remaining Reds: ${redPoints}`;
+  }
+
+  function incrementScore(team, points, color) {
+    // Handle foul logic
+    if (foulTo) {
+      if (foulTo === "a") {
+        scoreA += points; // Award points to Team A
+        updateUI("a", points, color, true); // Update UI for foul
+      } else if (foulTo === "b") {
+        scoreB += points; // Award points to Team B
+        updateUI("b", points, color, true); // Update UI for foul
+      }
+      updatePointsDisplay(); // Update point difference and remaining reds immediately after a foul
+      return; // Skip the rest of the logic for fouls
+    }
+
+    // Regular scoring logic
+    if (redPoints > 0 && color !== "red") {
+      points += 1; // Add implied red
+      redPoints--;
+      totalPoints -= 8;
+    } else if (color === "red") {
+      redPoints--;
+      totalPoints -= 8;
+    } else if (redPoints === 0) {
+      totalPoints -= points;
+    }
+
+    if (team === "a") {
+      if (lastPlayer !== "a") resetBreak("a");
+      scoreA += points;
+      breakA += points;
+      updateUI("a", points, color);
+    } else {
+      if (lastPlayer !== "b") resetBreak("b");
+      scoreB += points;
+      breakB += points;
+      updateUI("b", points, color);
+    }
+
+    lastPlayer = team;
+    updatePointsDisplay(); // Update point difference and remaining reds after normal scoring
+  }
+
+  function updateUI(team, points, color, isFoul = false) {
+    const scoreElement = document.getElementById(`score-${team}`);
+    const breakElement = document.getElementById(`break-${team}`);
+    const historyElement = document.getElementById(`history-${team}`);
+
+    if (team === "a") {
+      scoreElement.textContent = scoreA;
+      breakElement.textContent = `Break: ${isFoul ? breakA : breakA}`;
+    } else {
+      scoreElement.textContent = scoreB;
+      breakElement.textContent = `Break: ${isFoul ? breakB : breakB}`;
+    }
+
+    if (!isFoul) {
+      const dot = document.createElement("div");
+      dot.style.backgroundColor = color;
+      historyElement.appendChild(dot);
+    }
+  }
+
+  function resetBreak(team) {
+    document.getElementById(`break-${team}`).textContent = "Break: 0";
+    document.getElementById(`history-${team}`).innerHTML = "";
+    if (team === "a") breakA = 0;
+    else breakB = 0;
+  }
+
+  function toggleFoul(team) {
+    foulTo = team;
+    const indicator = document.getElementById("foul-indicator");
+    if (team === "a") indicator.textContent = "Foul Mode: Points to Team A";
+    else if (team === "b") indicator.textContent = "Foul Mode: Points to Team B";
+    else indicator.textContent = "Foul Mode: Off";
+  }
+
+  function resetScores() {
+    scoreA = scoreB = breakA = breakB = 0;
+    redPoints = parseInt(document.getElementById("game-mode").value);
+    totalPoints = redPoints * 8 + 27;
+    lastPlayer = null;
+    foulTo = null;
+
+    document.querySelectorAll(".break-history").forEach(history => (history.innerHTML = ""));
+    document.querySelectorAll(".score").forEach(score => (score.textContent = "0"));
+    document.querySelectorAll(".break-score").forEach(breakScore => (breakScore.textContent = "Break: 0"));
+    document.getElementById("foul-indicator").textContent = "Foul Mode: Off";
+    document.getElementById("frame-a").textContent = frameA;
+    document.getElementById("frame-b").textContent = frameB;
+    updatePointsDisplay();
+  }
+
+  function changeFrame(team, change) {
+    if (team === "a") {
+      frameA += change;
+      document.getElementById("frame-a").textContent = frameA;
+    } else if (team === "b") {
+      frameB += change;
+      document.getElementById("frame-b").textContent = frameB;
+    }
+  }
+</script>
+</body>
+</html>
